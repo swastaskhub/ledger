@@ -29,8 +29,6 @@
     color:var(--text);
     -webkit-font-smoothing:antialiased;
   }
-
-  /* Header */
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
     padding:18px 28px;
@@ -49,21 +47,14 @@
   .brand small{display:block;color:rgba(255,255,255,.82);font-weight:500;font-size:12.5px}
   .topbar .acct{color:#fff;text-align:right;font-size:13px;opacity:.92}
   .topbar .acct b{display:block;font-size:15px}
-
   .wrap{max-width:1280px;margin:0 auto;padding:26px 22px 60px}
-
-  /* Summary cards */
   .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-  .card{
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:16px 18px;
-  }
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
   .card .k{color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.6px}
   .card .v{font-size:26px;font-weight:700;margin-top:6px}
   .card.green .v{color:#3ed98a}
   .card.red .v{color:#ff6b66}
   .card.brand .v{color:#5fa0ff}
-
   .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px}
   .toolbar h2{margin:0;font-size:18px}
   .legend{display:flex;gap:10px;flex-wrap:wrap}
@@ -71,8 +62,6 @@
   .pill.ok{background:var(--green-bg);color:#3ed98a;border:1px solid rgba(31,157,87,.35)}
   .pill.fail{background:var(--red-bg);color:#ff6b66;border:1px solid rgba(224,65,60,.35)}
   .pill.part{background:var(--amber-bg);color:#f0c24c;border:1px solid rgba(224,166,25,.35)}
-
-  /* Table */
   .tablecard{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .scroll{overflow-x:auto}
   table{width:100%;border-collapse:collapse;min-width:1080px}
@@ -85,14 +74,13 @@
   tbody tr:hover{background:rgba(47,125,246,.06)}
   tbody tr:last-child td{border-bottom:none}
   .idx{color:var(--muted);font-variant-numeric:tabular-nums}
-  .email{font-weight:600}
+  .email{font-weight:600;font-family:"Consolas",monospace;font-size:13px}
   .ref{font-family:"Consolas",monospace;color:#9fd0ff;letter-spacing:.5px}
   .when{color:var(--muted);white-space:nowrap}
   .count{text-align:center;font-weight:700}
   .amt{font-weight:700;white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
   .amt.zero{color:#ff6b66}
   .amt.paid{color:#3ed98a}
-
   .status{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:12.5px}
   .dot{width:8px;height:8px;border-radius:50%}
   .status.ok{color:#3ed98a}.status.ok .dot{background:#3ed98a}
@@ -100,17 +88,11 @@
   .status.part{color:#f0c24c}.status.part .dot{background:#f0c24c}
   .reason{color:var(--muted);font-size:12.5px;line-height:1.4;max-width:260px}
   .reason.none{color:#3ed98a;opacity:.8}
-
-  /* Region badge */
   .region{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;margin-top:3px;white-space:nowrap}
   .region.ke{background:rgba(21,86,201,.18);color:#7cb9ff;border:1px solid rgba(21,86,201,.35)}
   .region.intl{background:rgba(224,166,25,.14);color:#f0c24c;border:1px solid rgba(224,166,25,.35)}
-
   footer{color:var(--muted);text-align:center;font-size:12.5px;margin-top:26px}
-
-  @media (max-width:880px){
-    .cards{grid-template-columns:repeat(2,1fr)}
-  }
+  @media(max-width:880px){.cards{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -124,7 +106,7 @@
     </div>
     <div class="acct">
       Report generated
-      <b>22 June 2026 — Updated</b>
+      <b>24 June 2026 — Updated</b>
     </div>
   </div>
 
@@ -169,110 +151,108 @@
   </div>
 
 <script>
+/* Email masking: first 3 chars of name + "***" + last 2 chars of name, same for domain part */
 function maskEmail(email){
   const [name, domain] = email.split("@");
-  const maskedName = name.slice(0,1) + "*".repeat(Math.max(2, name.length - 1));
-  const dotIdx = domain.lastIndexOf(".");
-  const tld    = domain.slice(dotIdx);
-  const dname  = domain.slice(0, dotIdx);
-  const maskedDomain = dname.slice(0,1) + "*".repeat(Math.max(2, dname.length - 1)) + tld;
-  return maskedName + "@" + maskedDomain;
+  function maskPart(s, showStart, showEnd){
+    if(s.length <= showStart + showEnd) return s;
+    return s.slice(0, showStart) + "***" + s.slice(s.length - showEnd);
+  }
+  const dotIdx   = domain.lastIndexOf(".");
+  const tld      = domain.slice(dotIdx);          // e.g. ".com"
+  const dname    = domain.slice(0, dotIdx);       // e.g. "gmail"
+  return maskPart(name, 3, 2) + "@" + maskPart(dname, 3, 2) + tld;
 }
+
 function fmt(n){ return n.toLocaleString("en-KE"); }
 
 /* ================================================================
-   DATA — 80 members
-   60 Kenya  |  5 Nigeria  |  5 Jamaica  |  10 other countries
-   Amounts range: KES 2,200 – 9,600
+   80 MEMBERS — randomly interleaved by country
+   60 Kenya | 5 Nigeria | 5 Jamaica | 10 others
+   All dates: 24 Jun 2026
+   Amounts: KES 2,200 – 9,600
    ================================================================ */
 const clients = [
-  /* ===== KENYA (60) ===== */
-  /* 01 */ {email:"wanjiku.beatrice77@gmail.com",    ref:"bx91kmp3zt", when:"8:14am Mon 15 Jun 2026",  times:1, status:"ok",   amount:3850},
-  /* 02 */ {email:"ochieng.felix90@yahoo.com",       ref:"cy04nqr7lw", when:"11:47am Tue 16 Jun 2026", times:2, status:"fail", amount:0,    reason:"Not successful — wrong credentials entered"},
-  /* 03 */ {email:"chebet.sharon.ke@gmail.com",      ref:"dz17okp5bm", when:"4:22pm Wed 17 Jun 2026",  times:1, status:"ok",   amount:6470},
-  /* 04 */ {email:"mutiso.brian44@gmail.com",        ref:"ea30plq8cn", when:"9:55am Thu 18 Jun 2026",  times:1, status:"ok",   amount:2780},
-  /* 05 */ {email:"akinyi.lavender@gmail.com",       ref:"fb43qmr6do", when:"2:38pm Fri 19 Jun 2026",  times:1, status:"ok",   amount:8150},
-  /* 06 */ {email:"njoroge.samuel09@gmail.com",      ref:"gc56rnk4ep", when:"7:11am Sat 20 Jun 2026",  times:3, status:"part", amount:4300, reason:"2 attempts failed (wrong credentials) — final attempt paid"},
-  /* 07 */ {email:"chepkoech.millicent@gmail.com",   ref:"hd69sol2fq", when:"12:44pm Sun 14 Jun 2026", times:1, status:"ok",   amount:7620},
-  /* 08 */ {email:"otiende.victor21@gmail.com",      ref:"ie72tpm9gr", when:"5:17pm Mon 15 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — used wrong withdrawal method"},
-  /* 09 */ {email:"nduta.rachel.biz@gmail.com",      ref:"jf85uqn7hs", when:"10:50am Tue 16 Jun 2026", times:1, status:"ok",   amount:5190},
-  /* 10 */ {email:"wekesa.collins3@gmail.com",       ref:"kg98vrm5it", when:"3:23pm Wed 17 Jun 2026",  times:1, status:"ok",   amount:3470},
-  /* 11 */ {email:"mwende.patricia@gmail.com",       ref:"lh11wsn3ju", when:"8:56am Thu 18 Jun 2026",  times:1, status:"ok",   amount:9200},
-  /* 12 */ {email:"barasa.clinton67@gmail.com",      ref:"mi24xto1kv", when:"1:29pm Fri 19 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — email mismatch on the credentials"},
-  /* 13 */ {email:"njeri.josephine.ke@gmail.com",    ref:"nj37yup8lw", when:"6:02pm Sat 20 Jun 2026",  times:1, status:"ok",   amount:6830},
-  /* 14 */ {email:"kiplagat.moses55@gmail.com",      ref:"ok50zvq6mx", when:"11:35am Sun 14 Jun 2026", times:1, status:"ok",   amount:4560},
-  /* 15 */ {email:"auma.stacy.2001@gmail.com",       ref:"pl63awr4ny", when:"4:08pm Mon 15 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — email does not match the credentials"},
-  /* 16 */ {email:"mwangi.eric.dev@gmail.com",       ref:"qm76bxs2oz", when:"9:41am Tue 16 Jun 2026",  times:1, status:"ok",   amount:7340},
-  /* 17 */ {email:"wambua.lydia88@gmail.com",        ref:"rn89cyt9pa", when:"2:14pm Wed 17 Jun 2026",  times:1, status:"ok",   amount:2590},
-  /* 18 */ {email:"onyango.kevin.co@gmail.com",      ref:"so02dzu7qb", when:"7:47am Thu 18 Jun 2026",  times:3, status:"fail", amount:0,    reason:"Not successful — wrong credentials supplied"},
-  /* 19 */ {email:"cherotich.anne14@gmail.com",      ref:"tp15eav5rc", when:"12:20pm Fri 19 Jun 2026", times:1, status:"ok",   amount:5870},
-  /* 20 */ {email:"gitau.james.ke@gmail.com",        ref:"uq28fbw3sd", when:"5:53pm Sat 20 Jun 2026",  times:1, status:"ok",   amount:3210},
-  /* 21 */ {email:"moraa.cynthia7@gmail.com",        ref:"vr41gcx1te", when:"10:26am Sun 14 Jun 2026", times:1, status:"ok",   amount:8690},
-  /* 22 */ {email:"korir.timothy.biz@gmail.com",     ref:"ws54hdz8uf", when:"3:59pm Mon 15 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — wrong withdrawal approach used"},
-  /* 23 */ {email:"ndegwa.agnes99@gmail.com",        ref:"xt67iea6vg", when:"8:32am Tue 16 Jun 2026",  times:1, status:"ok",   amount:6150},
-  /* 24 */ {email:"ouma.daniel.ke@gmail.com",        ref:"yu80jfb4wh", when:"1:05pm Wed 17 Jun 2026",  times:1, status:"ok",   amount:4890},
-  /* 25 */ {email:"wanjiru.purity03@gmail.com",      ref:"zv93kgc2xi", when:"6:38pm Thu 18 Jun 2026",  times:3, status:"part", amount:5600, reason:"First 2 attempts failed (wrong M-Pesa number) — third attempt paid"},
-  /* 26 */ {email:"muthomi.fredrick@gmail.com",      ref:"aw06lhd9yj", when:"11:11am Fri 19 Jun 2026", times:1, status:"ok",   amount:7980},
-  /* 27 */ {email:"jepkemoi.vivian.ke@gmail.com",    ref:"bx19mie7zk", when:"4:44pm Sat 20 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — incorrect withdrawal approach"},
-  /* 28 */ {email:"ndirangu.alex22@gmail.com",       ref:"cy32njf5al", when:"9:17am Sun 14 Jun 2026",  times:1, status:"ok",   amount:3730},
-  /* 29 */ {email:"atieno.brenda.co@gmail.com",      ref:"dz45okg3bm", when:"2:50pm Mon 15 Jun 2026",  times:1, status:"ok",   amount:6390},
-  /* 30 */ {email:"mwangangi.henry5@gmail.com",      ref:"ea58plh1cn", when:"7:23am Tue 16 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — credentials did not match the email"},
-  /* 31 */ {email:"wangare.naomi.biz@gmail.com",     ref:"fb71qmi8do", when:"12:56pm Wed 17 Jun 2026", times:1, status:"ok",   amount:5020},
-  /* 32 */ {email:"kibet.george.ke@gmail.com",       ref:"gc84rnj6ep", when:"5:29pm Thu 18 Jun 2026",  times:1, status:"ok",   amount:8430},
-  /* 33 */ {email:"njoki.susan44@gmail.com",         ref:"hd97sok4fq", when:"10:02am Fri 19 Jun 2026", times:1, status:"ok",   amount:4170},
-  /* 34 */ {email:"mutua.isaac.dev@gmail.com",       ref:"ie10tpl2gr", when:"3:35pm Sat 20 Jun 2026",  times:3, status:"fail", amount:0,    reason:"Not successful — wrong login credentials"},
-  /* 35 */ {email:"chelagat.brenda08@gmail.com",     ref:"jf23uqm9hs", when:"8:08am Sun 14 Jun 2026",  times:1, status:"ok",   amount:7150},
-  /* 36 */ {email:"wafula.stephen.ke@gmail.com",     ref:"kg36vrn7it", when:"1:41pm Mon 15 Jun 2026",  times:1, status:"ok",   amount:3960},
-  /* 37 */ {email:"cheptoo.esther33@gmail.com",      ref:"lh49wso5ju", when:"6:14pm Tue 16 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — wrong credentials entered repeatedly"},
-  /* 38 */ {email:"maina.john.biz@gmail.com",        ref:"mi62xtp3kv", when:"11:47am Wed 17 Jun 2026", times:1, status:"ok",   amount:9080},
-  /* 39 */ {email:"akinyi.mercy12@gmail.com",        ref:"nj75yuq1lw", when:"4:20pm Thu 18 Jun 2026",  times:1, status:"ok",   amount:2940},
-  /* 40 */ {email:"kiplangat.robert@gmail.com",      ref:"ok88zvr8mx", when:"9:53am Fri 19 Jun 2026",  times:1, status:"ok",   amount:6710},
-  /* 41 */ {email:"wanjiku.hellen55@gmail.com",      ref:"pl01aws6ny", when:"2:26pm Sat 20 Jun 2026",  times:3, status:"part", amount:4850, reason:"2 attempts failed (email mismatch) — final attempt paid"},
-  /* 42 */ {email:"otieno.charles.co@gmail.com",     ref:"qm14bxt4oz", when:"7:59am Sun 14 Jun 2026",  times:1, status:"ok",   amount:7760},
-  /* 43 */ {email:"nduku.harriet.ke@gmail.com",      ref:"rn27cyu2pa", when:"12:32pm Mon 15 Jun 2026", times:1, status:"ok",   amount:5430},
-  /* 44 */ {email:"kariuki.stephen9@gmail.com",      ref:"so40dzv9qb", when:"5:05pm Tue 16 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — supplied wrong withdrawal credentials"},
-  /* 45 */ {email:"makori.samwel.biz@gmail.com",     ref:"tp53eaw7rc", when:"10:38am Wed 17 Jun 2026", times:1, status:"ok",   amount:3290},
-  /* 46 */ {email:"nyambura.hellen@gmail.com",       ref:"uq66fbx5sd", when:"3:11pm Thu 18 Jun 2026",  times:1, status:"ok",   amount:8840},
-  /* 47 */ {email:"omolo.victor.dev@gmail.com",      ref:"vr79gcy3te", when:"8:44am Fri 19 Jun 2026",  times:1, status:"ok",   amount:6060},
-  /* 48 */ {email:"cherono.joan44@gmail.com",        ref:"ws92hdz1uf", when:"1:17pm Sat 20 Jun 2026",  times:1, status:"ok",   amount:4420},
-  /* 49 */ {email:"wekesa.felix.ke@gmail.com",       ref:"xt05iea8vg", when:"6:50pm Sun 14 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — wrong credentials entered"},
-  /* 50 */ {email:"ochieng.raymond3@gmail.com",      ref:"yu18jfb6wh", when:"11:23am Mon 15 Jun 2026", times:1, status:"ok",   amount:7490},
-  /* 51 */ {email:"mwita.evan.co@gmail.com",         ref:"zv31kgc4xi", when:"4:56pm Tue 16 Jun 2026",  times:1, status:"ok",   amount:3640},
-  /* 52 */ {email:"wairimu.diana7@gmail.com",        ref:"aw44lhd2yj", when:"9:29am Wed 17 Jun 2026",  times:3, status:"part", amount:6200, reason:"First attempt failed (wrong method) — second attempt paid"},
-  /* 53 */ {email:"muriuki.frank.biz@gmail.com",     ref:"bx57mie9zk", when:"2:02pm Thu 18 Jun 2026",  times:1, status:"ok",   amount:5350},
-  /* 54 */ {email:"kipchoge.jackson@gmail.com",      ref:"cy70njf7al", when:"7:35am Fri 19 Jun 2026",  times:1, status:"ok",   amount:9600},
-  /* 55 */ {email:"njuguna.purity.ke@gmail.com",     ref:"dz83okg5bm", when:"12:08pm Sat 20 Jun 2026", times:2, status:"fail", amount:0,    reason:"Not successful — email mismatch with the credentials"},
-  /* 56 */ {email:"wanjiku.maureen5@gmail.com",      ref:"ea96plh3cn", when:"5:41pm Sun 14 Jun 2026",  times:1, status:"ok",   amount:4710},
-  /* 57 */ {email:"otieno.dennis.dev@gmail.com",     ref:"fb09qmi1do", when:"10:14am Mon 15 Jun 2026", times:1, status:"ok",   amount:8270},
-  /* 58 */ {email:"mwangi.peninah@gmail.com",        ref:"gc22rnj8ep", when:"3:47pm Tue 16 Jun 2026",  times:1, status:"ok",   amount:3080},
-  /* 59 */ {email:"kemboi.pauline9@gmail.com",       ref:"hd35sok6fq", when:"8:20am Wed 17 Jun 2026",  times:3, status:"fail", amount:0,    reason:"Not successful — wrong withdrawal approach used"},
-  /* 60 */ {email:"onyango.oscar.ke@gmail.com",      ref:"ie48tpl4gr", when:"1:53pm Thu 18 Jun 2026",  times:1, status:"ok",   amount:7020},
-
-  /* ===== NIGERIA (5) ===== */
-  /* 61 */ {email:"emeka.chidi.ng@gmail.com",        ref:"ng52aws8ny", when:"12:44am Thu 18 Jun 2026", times:3, status:"part", amount:4600, reason:"2 attempts failed (wrong method) — final attempt paid",          intl:"Nigeria 🇳🇬"},
-  /* 62 */ {email:"adaeze.okonkwo.ng@gmail.com",     ref:"ng65bxp9oz", when:"9:10am Fri 19 Jun 2026",  times:1, status:"ok",   amount:7850,                                                                         intl:"Nigeria 🇳🇬"},
-  /* 63 */ {email:"tunde.afolabi09@yahoo.com",       ref:"ng78cyq7pa", when:"2:33pm Sat 20 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — wrong credentials entered",                      intl:"Nigeria 🇳🇬"},
-  /* 64 */ {email:"ngozi.eze.biz@gmail.com",         ref:"ng91dzr5qb", when:"7:06am Sun 14 Jun 2026",  times:1, status:"ok",   amount:5480,                                                                         intl:"Nigeria 🇳🇬"},
-  /* 65 */ {email:"kelechi.obi.ng@gmail.com",        ref:"ng04eas3rc", when:"4:19pm Mon 15 Jun 2026",  times:1, status:"ok",   amount:9100,                                                                         intl:"Nigeria 🇳🇬"},
-
-  /* ===== JAMAICA (5) ===== */
-  /* 66 */ {email:"marcia.brown.jm@gmail.com",       ref:"jm17fbt1sd", when:"11:42am Tue 16 Jun 2026", times:1, status:"ok",   amount:6350,                                                                         intl:"Jamaica 🇯🇲"},
-  /* 67 */ {email:"dalton.campbell.jm@gmail.com",    ref:"jm30gcu8te", when:"6:15pm Wed 17 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — email mismatch on the credentials",             intl:"Jamaica 🇯🇲"},
-  /* 68 */ {email:"keisha.henry9@yahoo.com",         ref:"jm43hdv6uf", when:"8:48am Thu 18 Jun 2026",  times:1, status:"ok",   amount:4230,                                                                         intl:"Jamaica 🇯🇲"},
-  /* 69 */ {email:"oshane.stewart.jm@gmail.com",     ref:"jm56iew4vg", when:"3:21pm Fri 19 Jun 2026",  times:3, status:"part", amount:5750, reason:"First 2 attempts failed (wrong M-Pesa number) — third attempt paid", intl:"Jamaica 🇯🇲"},
-  /* 70 */ {email:"tamara.reid.biz@gmail.com",       ref:"jm69jfx2wh", when:"10:54am Sat 20 Jun 2026", times:1, status:"ok",   amount:8390,                                                                         intl:"Jamaica 🇯🇲"},
-
-  /* ===== OTHER COUNTRIES (10) ===== */
-  /* 71 — Uganda    */ {email:"nakato.diana.ug@gmail.com",     ref:"ug82kgy9xi", when:"9:05am Mon 15 Jun 2026",  times:1, status:"ok",   amount:5160, intl:"Uganda 🇺🇬"},
-  /* 72 — Tanzania  */ {email:"rashidi.amina.tz@yahoo.com",    ref:"tz95lhz7yj", when:"2:38pm Tue 16 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — wrong withdrawal credentials",              intl:"Tanzania 🇹🇿"},
-  /* 73 — Rwanda    */ {email:"habimana.celestin.rw@gmail.com",ref:"rw08mia5zk", when:"7:11pm Wed 17 Jun 2026",  times:1, status:"ok",   amount:7380, intl:"Rwanda 🇷🇼"},
-  /* 74 — Ghana     */ {email:"boateng.ama.gh@gmail.com",      ref:"gh21njb3al", when:"5:17pm Fri 19 Jun 2026",  times:1, status:"ok",   amount:8910, intl:"Ghana 🇬🇭"},
-  /* 75 — S. Africa */ {email:"nkosi.thandi.za@gmail.com",     ref:"za34okc1bm", when:"10:50am Sat 20 Jun 2026", times:1, status:"ok",   amount:6730, intl:"South Africa 🇿🇦"},
-  /* 76 — Ethiopia  */ {email:"bekele.tigist.et@gmail.com",    ref:"et47pld8cn", when:"3:23pm Sun 14 Jun 2026",  times:1, status:"ok",   amount:5540, intl:"Ethiopia 🇪🇹"},
-  /* 77 — India     */ {email:"priya.sharma.in@gmail.com",     ref:"in60qme6do", when:"6:56am Mon 15 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — incorrect withdrawal approach used",        intl:"India 🇮🇳"},
-  /* 78 — Philippines*/{email:"santos.maria.ph@gmail.com",     ref:"ph73rnf4ep", when:"1:29pm Tue 16 Jun 2026",  times:1, status:"ok",   amount:4780, intl:"Philippines 🇵🇭"},
-  /* 79 — Zimbabwe  */ {email:"chipo.moyo.zw@gmail.com",       ref:"zw86sog2fq", when:"8:02am Wed 17 Jun 2026",  times:3, status:"part", amount:3970, reason:"2 attempts failed (wrong credentials) — final attempt paid",  intl:"Zimbabwe 🇿🇼"},
-  /* 80 — Zambia    */ {email:"mulenga.bupe.zm@gmail.com",     ref:"zm99tph9gr", when:"2:35pm Thu 18 Jun 2026",  times:1, status:"ok",   amount:6890, intl:"Zambia 🇿🇲"},
+  /* 01 KE */ {email:"wanjiku.beatrice77@gmail.com",    ref:"bx91kmp3zt", when:"8:14am Wed 24 Jun 2026",  times:1, status:"ok",   amount:3850},
+  /* 02 NG */ {email:"emeka.chidi.ng@gmail.com",        ref:"ng52aws8ny", when:"8:31am Wed 24 Jun 2026",  times:3, status:"part", amount:4600, reason:"2 attempts failed (wrong method) — final attempt paid",          intl:"Nigeria 🇳🇬"},
+  /* 03 KE */ {email:"chebet.sharon.ke@gmail.com",      ref:"dz17okp5bm", when:"8:47am Wed 24 Jun 2026",  times:1, status:"ok",   amount:6470},
+  /* 04 JM */ {email:"marcia.brown.jm@gmail.com",       ref:"jm17fbt1sd", when:"9:02am Wed 24 Jun 2026",  times:1, status:"ok",   amount:6350,                                                                         intl:"Jamaica 🇯🇲"},
+  /* 05 KE */ {email:"mutiso.brian44@gmail.com",        ref:"ea30plq8cn", when:"9:18am Wed 24 Jun 2026",  times:1, status:"ok",   amount:2780},
+  /* 06 UG */ {email:"nakato.diana.ug@gmail.com",       ref:"ug82kgy9xi", when:"9:33am Wed 24 Jun 2026",  times:1, status:"ok",   amount:5160,                                                                         intl:"Uganda 🇺🇬"},
+  /* 07 KE */ {email:"akinyi.lavender@gmail.com",       ref:"fb43qmr6do", when:"9:49am Wed 24 Jun 2026",  times:1, status:"ok",   amount:8150},
+  /* 08 KE */ {email:"ochieng.felix90@yahoo.com",       ref:"cy04nqr7lw", when:"10:05am Wed 24 Jun 2026", times:2, status:"fail", amount:0,    reason:"Not successful — wrong credentials entered"},
+  /* 09 TZ */ {email:"rashidi.amina.tz@yahoo.com",      ref:"tz95lhz7yj", when:"10:21am Wed 24 Jun 2026", times:2, status:"fail", amount:0,    reason:"Not successful — wrong withdrawal credentials",                  intl:"Tanzania 🇹🇿"},
+  /* 10 KE */ {email:"njoroge.samuel09@gmail.com",      ref:"gc56rnk4ep", when:"10:38am Wed 24 Jun 2026", times:3, status:"part", amount:4300, reason:"2 attempts failed (wrong credentials) — final attempt paid"},
+  /* 11 NG */ {email:"adaeze.okonkwo.ng@gmail.com",     ref:"ng65bxp9oz", when:"10:54am Wed 24 Jun 2026", times:1, status:"ok",   amount:7850,                                                                         intl:"Nigeria 🇳🇬"},
+  /* 12 KE */ {email:"chepkoech.millicent@gmail.com",   ref:"hd69sol2fq", when:"11:09am Wed 24 Jun 2026", times:1, status:"ok",   amount:7620},
+  /* 13 RW */ {email:"habimana.celestin.rw@gmail.com",  ref:"rw08mia5zk", when:"11:25am Wed 24 Jun 2026", times:1, status:"ok",   amount:7380,                                                                         intl:"Rwanda 🇷🇼"},
+  /* 14 KE */ {email:"otiende.victor21@gmail.com",      ref:"ie72tpm9gr", when:"11:41am Wed 24 Jun 2026", times:2, status:"fail", amount:0,    reason:"Not successful — used wrong withdrawal method"},
+  /* 15 JM */ {email:"dalton.campbell.jm@gmail.com",    ref:"jm30gcu8te", when:"11:57am Wed 24 Jun 2026", times:2, status:"fail", amount:0,    reason:"Not successful — email mismatch on the credentials",             intl:"Jamaica 🇯🇲"},
+  /* 16 KE */ {email:"nduta.rachel.biz@gmail.com",      ref:"jf85uqn7hs", when:"12:13pm Wed 24 Jun 2026", times:1, status:"ok",   amount:5190},
+  /* 17 IN */ {email:"priya.sharma.in@gmail.com",       ref:"in60qme6do", when:"12:29pm Wed 24 Jun 2026", times:2, status:"fail", amount:0,    reason:"Not successful — incorrect withdrawal approach used",             intl:"India 🇮🇳"},
+  /* 18 KE */ {email:"wekesa.collins3@gmail.com",       ref:"kg98vrm5it", when:"12:45pm Wed 24 Jun 2026", times:1, status:"ok",   amount:3470},
+  /* 19 KE */ {email:"mwende.patricia@gmail.com",       ref:"lh11wsn3ju", when:"1:01pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:9200},
+  /* 20 NG */ {email:"tunde.afolabi09@yahoo.com",       ref:"ng78cyq7pa", when:"1:17pm Wed 24 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — wrong credentials entered",                      intl:"Nigeria 🇳🇬"},
+  /* 21 KE */ {email:"barasa.clinton67@gmail.com",      ref:"mi24xto1kv", when:"1:33pm Wed 24 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — email mismatch on the credentials"},
+  /* 22 GH */ {email:"boateng.ama.gh@gmail.com",        ref:"gh21njb3al", when:"1:49pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:8910,                                                                         intl:"Ghana 🇬🇭"},
+  /* 23 KE */ {email:"njeri.josephine.ke@gmail.com",    ref:"nj37yup8lw", when:"2:05pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:6830},
+  /* 24 JM */ {email:"keisha.henry9@yahoo.com",         ref:"jm43hdv6uf", when:"2:21pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:4230,                                                                         intl:"Jamaica 🇯🇲"},
+  /* 25 KE */ {email:"kiplagat.moses55@gmail.com",      ref:"ok50zvq6mx", when:"2:37pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:4560},
+  /* 26 ZA */ {email:"nkosi.thandi.za@gmail.com",       ref:"za34okc1bm", when:"2:53pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:6730,                                                                         intl:"South Africa 🇿🇦"},
+  /* 27 KE */ {email:"auma.stacy.2001@gmail.com",       ref:"pl63awr4ny", when:"3:09pm Wed 24 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — email does not match the credentials"},
+  /* 28 KE */ {email:"mwangi.eric.dev@gmail.com",       ref:"qm76bxs2oz", when:"3:25pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:7340},
+  /* 29 NG */ {email:"ngozi.eze.biz@gmail.com",         ref:"ng91dzr5qb", when:"3:41pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:5480,                                                                         intl:"Nigeria 🇳🇬"},
+  /* 30 KE */ {email:"wambua.lydia88@gmail.com",        ref:"rn89cyt9pa", when:"3:57pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:2590},
+  /* 31 ET */ {email:"bekele.tigist.et@gmail.com",      ref:"et47pld8cn", when:"4:13pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:5540,                                                                         intl:"Ethiopia 🇪🇹"},
+  /* 32 KE */ {email:"onyango.kevin.co@gmail.com",      ref:"so02dzu7qb", when:"4:29pm Wed 24 Jun 2026",  times:3, status:"fail", amount:0,    reason:"Not successful — wrong credentials supplied"},
+  /* 33 JM */ {email:"oshane.stewart.jm@gmail.com",     ref:"jm56iew4vg", when:"4:45pm Wed 24 Jun 2026",  times:3, status:"part", amount:5750, reason:"First 2 attempts failed (wrong M-Pesa number) — third attempt paid", intl:"Jamaica 🇯🇲"},
+  /* 34 KE */ {email:"cherotich.anne14@gmail.com",      ref:"tp15eav5rc", when:"5:01pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:5870},
+  /* 35 PH */ {email:"santos.maria.ph@gmail.com",       ref:"ph73rnf4ep", when:"5:17pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:4780,                                                                         intl:"Philippines 🇵🇭"},
+  /* 36 KE */ {email:"gitau.james.ke@gmail.com",        ref:"uq28fbw3sd", when:"5:33pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:3210},
+  /* 37 KE */ {email:"moraa.cynthia7@gmail.com",        ref:"vr41gcx1te", when:"5:49pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:8690},
+  /* 38 NG */ {email:"kelechi.obi.ng@gmail.com",        ref:"ng04eas3rc", when:"6:05pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:9100,                                                                         intl:"Nigeria 🇳🇬"},
+  /* 39 KE */ {email:"korir.timothy.biz@gmail.com",     ref:"ws54hdz8uf", when:"6:21pm Wed 24 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — wrong withdrawal approach used"},
+  /* 40 ZW */ {email:"chipo.moyo.zw@gmail.com",         ref:"zw86sog2fq", when:"6:37pm Wed 24 Jun 2026",  times:3, status:"part", amount:3970, reason:"2 attempts failed (wrong credentials) — final attempt paid",      intl:"Zimbabwe 🇿🇼"},
+  /* 41 KE */ {email:"ndegwa.agnes99@gmail.com",        ref:"xt67iea6vg", when:"6:53pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:6150},
+  /* 42 KE */ {email:"ouma.daniel.ke@gmail.com",        ref:"yu80jfb4wh", when:"7:09pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:4890},
+  /* 43 JM */ {email:"tamara.reid.biz@gmail.com",       ref:"jm69jfx2wh", when:"7:25pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:8390,                                                                         intl:"Jamaica 🇯🇲"},
+  /* 44 KE */ {email:"wanjiru.purity03@gmail.com",      ref:"zv93kgc2xi", when:"7:41pm Wed 24 Jun 2026",  times:3, status:"part", amount:5600, reason:"First 2 attempts failed (wrong M-Pesa number) — third attempt paid"},
+  /* 45 ZM */ {email:"mulenga.bupe.zm@gmail.com",       ref:"zm99tph9gr", when:"7:57pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:6890,                                                                         intl:"Zambia 🇿🇲"},
+  /* 46 KE */ {email:"muthomi.fredrick@gmail.com",      ref:"aw06lhd9yj", when:"8:13pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:7980},
+  /* 47 KE */ {email:"jepkemoi.vivian.ke@gmail.com",    ref:"bx19mie7zk", when:"8:29pm Wed 24 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — incorrect withdrawal approach"},
+  /* 48 KE */ {email:"ndirangu.alex22@gmail.com",       ref:"cy32njf5al", when:"8:45pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:3730},
+  /* 49 KE */ {email:"atieno.brenda.co@gmail.com",      ref:"dz45okg3bm", when:"9:01pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:6390},
+  /* 50 KE */ {email:"mwangangi.henry5@gmail.com",      ref:"ea58plh1cn", when:"9:17pm Wed 24 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — credentials did not match the email"},
+  /* 51 KE */ {email:"wangare.naomi.biz@gmail.com",     ref:"fb71qmi8do", when:"9:33pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:5020},
+  /* 52 KE */ {email:"kibet.george.ke@gmail.com",       ref:"gc84rnj6ep", when:"9:49pm Wed 24 Jun 2026",  times:1, status:"ok",   amount:8430},
+  /* 53 KE */ {email:"njoki.susan44@gmail.com",         ref:"hd97sok4fq", when:"10:05pm Wed 24 Jun 2026", times:1, status:"ok",   amount:4170},
+  /* 54 KE */ {email:"mutua.isaac.dev@gmail.com",       ref:"ie10tpl2gr", when:"10:21pm Wed 24 Jun 2026", times:3, status:"fail", amount:0,    reason:"Not successful — wrong login credentials"},
+  /* 55 KE */ {email:"chelagat.brenda08@gmail.com",     ref:"jf23uqm9hs", when:"10:37pm Wed 24 Jun 2026", times:1, status:"ok",   amount:7150},
+  /* 56 KE */ {email:"wafula.stephen.ke@gmail.com",     ref:"kg36vrn7it", when:"10:53pm Wed 24 Jun 2026", times:1, status:"ok",   amount:3960},
+  /* 57 KE */ {email:"cheptoo.esther33@gmail.com",      ref:"lh49wso5ju", when:"11:09pm Wed 24 Jun 2026", times:2, status:"fail", amount:0,    reason:"Not successful — wrong credentials entered repeatedly"},
+  /* 58 KE */ {email:"maina.john.biz@gmail.com",        ref:"mi62xtp3kv", when:"11:25pm Wed 24 Jun 2026", times:1, status:"ok",   amount:9080},
+  /* 59 KE */ {email:"akinyi.mercy12@gmail.com",        ref:"nj75yuq1lw", when:"11:41pm Wed 24 Jun 2026", times:1, status:"ok",   amount:2940},
+  /* 60 KE */ {email:"kiplangat.robert@gmail.com",      ref:"ok88zvr8mx", when:"11:57pm Wed 24 Jun 2026", times:1, status:"ok",   amount:6710},
+  /* 61 KE */ {email:"wanjiku.hellen55@gmail.com",      ref:"pl01aws6ny", when:"12:13am Thu 24 Jun 2026", times:3, status:"part", amount:4850, reason:"2 attempts failed (email mismatch) — final attempt paid"},
+  /* 62 KE */ {email:"otieno.charles.co@gmail.com",     ref:"qm14bxt4oz", when:"12:29am Thu 24 Jun 2026", times:1, status:"ok",   amount:7760},
+  /* 63 KE */ {email:"nduku.harriet.ke@gmail.com",      ref:"rn27cyu2pa", when:"12:45am Thu 24 Jun 2026", times:1, status:"ok",   amount:5430},
+  /* 64 KE */ {email:"kariuki.stephen9@gmail.com",      ref:"so40dzv9qb", when:"1:01am Thu 24 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — supplied wrong withdrawal credentials"},
+  /* 65 KE */ {email:"makori.samwel.biz@gmail.com",     ref:"tp53eaw7rc", when:"1:17am Thu 24 Jun 2026",  times:1, status:"ok",   amount:3290},
+  /* 66 KE */ {email:"nyambura.hellen@gmail.com",       ref:"uq66fbx5sd", when:"1:33am Thu 24 Jun 2026",  times:1, status:"ok",   amount:8840},
+  /* 67 KE */ {email:"omolo.victor.dev@gmail.com",      ref:"vr79gcy3te", when:"1:49am Thu 24 Jun 2026",  times:1, status:"ok",   amount:6060},
+  /* 68 KE */ {email:"cherono.joan44@gmail.com",        ref:"ws92hdz1uf", when:"2:05am Thu 24 Jun 2026",  times:1, status:"ok",   amount:4420},
+  /* 69 KE */ {email:"wekesa.felix.ke@gmail.com",       ref:"xt05iea8vg", when:"2:21am Thu 24 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — wrong credentials entered"},
+  /* 70 KE */ {email:"ochieng.raymond3@gmail.com",      ref:"yu18jfb6wh", when:"2:37am Thu 24 Jun 2026",  times:1, status:"ok",   amount:7490},
+  /* 71 KE */ {email:"mwita.evan.co@gmail.com",         ref:"zv31kgc4xi", when:"2:53am Thu 24 Jun 2026",  times:1, status:"ok",   amount:3640},
+  /* 72 KE */ {email:"wairimu.diana7@gmail.com",        ref:"aw44lhd2yj", when:"3:09am Thu 24 Jun 2026",  times:3, status:"part", amount:6200, reason:"First attempt failed (wrong method) — second attempt paid"},
+  /* 73 KE */ {email:"muriuki.frank.biz@gmail.com",     ref:"bx57mie9zk", when:"3:25am Thu 24 Jun 2026",  times:1, status:"ok",   amount:5350},
+  /* 74 KE */ {email:"kipchoge.jackson@gmail.com",      ref:"cy70njf7al", when:"3:41am Thu 24 Jun 2026",  times:1, status:"ok",   amount:9600},
+  /* 75 KE */ {email:"njuguna.purity.ke@gmail.com",     ref:"dz83okg5bm", when:"3:57am Thu 24 Jun 2026",  times:2, status:"fail", amount:0,    reason:"Not successful — email mismatch with the credentials"},
+  /* 76 KE */ {email:"wanjiku.maureen5@gmail.com",      ref:"ea96plh3cn", when:"4:13am Thu 24 Jun 2026",  times:1, status:"ok",   amount:4710},
+  /* 77 KE */ {email:"otieno.dennis.dev@gmail.com",     ref:"fb09qmi1do", when:"4:29am Thu 24 Jun 2026",  times:1, status:"ok",   amount:8270},
+  /* 78 KE */ {email:"mwangi.peninah@gmail.com",        ref:"gc22rnj8ep", when:"4:45am Thu 24 Jun 2026",  times:1, status:"ok",   amount:3080},
+  /* 79 KE */ {email:"kemboi.pauline9@gmail.com",       ref:"hd35sok6fq", when:"5:01am Thu 24 Jun 2026",  times:3, status:"fail", amount:0,    reason:"Not successful — wrong withdrawal approach used"},
+  /* 80 KE */ {email:"onyango.oscar.ke@gmail.com",      ref:"ie48tpl4gr", when:"5:17am Thu 24 Jun 2026",  times:1, status:"ok",   amount:7020},
 ];
 
 /* ---- Render ---- */
@@ -282,23 +262,20 @@ const statusMap = {
   fail: {cls:"fail", label:"Not successful"}
 };
 
-const rowsEl   = document.getElementById("rows");
-let totalPaid  = 0;
-let totalOk    = 0;
-let totalFail  = 0;
+const rowsEl  = document.getElementById("rows");
+let totalPaid = 0, totalOk = 0, totalFail = 0;
 
 clients.forEach((c, i) => {
   if(c.amount) totalPaid += c.amount;
-  if(c.status === "ok") totalOk++;
+  if(c.status === "ok")   totalOk++;
   if(c.status === "fail") totalFail++;
 
-  const st = statusMap[c.status];
+  const st     = statusMap[c.status];
   const amtCls = c.amount ? "paid" : "zero";
   const amtTxt = c.amount ? "KES " + fmt(c.amount) : "Zero paid";
   const reason = c.reason
       ? `<div class="reason">${c.reason}</div>`
       : `<div class="reason none">— processed without issues</div>`;
-
   const regionBadge = c.intl
       ? `<br><span class="region intl">${c.intl}</span>`
       : `<br><span class="region ke">Kenya 🇰🇪</span>`;
